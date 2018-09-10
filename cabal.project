@@ -1,0 +1,4 @@
+packages: .
+
+package cont-io-playground
+  ghc-options: -Wall -Werror -fno-warn-unused-imports
