@@ -24,7 +24,7 @@ import           Control.Monad.ContIO.Class
 
 
 forkSequential :: ContT r IO Bool
-forkSequential = ContT $ \c -> c False >> c True
+forkSequential = ContT $ \c -> c True >> c False
 
 forkSequentialN :: Int -> ContT () IO Int
 forkSequentialN n = ContT $ forM_ [1 .. n]
