@@ -54,7 +54,21 @@ createFinalPoint = liftContIO $ ContT $ \c -> do
 withLifted
   :: MonadContIO m => (forall r . (a -> IO r) -> IO r) -> (a -> m b) -> m b
 withLifted withC f = do
-  final <- createFinalPoint
-  a     <- liftContIO $ ContT withC
-  b     <- f a
-  final b
+  escape <- createFinalPoint
+  a      <- liftContIO $ ContT withC
+  b      <- f a
+  escape b
+
+-- | A version of `resetT` both specialized and generalized to MonadContIO.
+--
+-- For reference: `resetT :: (Monad m) => ContT r m r -> ContT r' m r`
+--
+-- resetT      is polymorphic over the things "below" in the monad stack, while
+-- resetContIO is polymorphic over the things "above".
+resetContIO :: MonadContIO m => m a -> m a
+resetContIO m = do
+  escape <- createFinalPoint
+  r <- m
+  escape r
+-- or for people that dislike points (and readability):
+-- resetCIO = (createFinalPoint >>=) . (>>=)
