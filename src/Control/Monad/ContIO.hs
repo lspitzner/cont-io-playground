@@ -1,6 +1,6 @@
 module Control.Monad.ContIO
-    -- wild-card re-exports to make things easier
-  ( module Control.Monad.ContIO
+  ( -- wild-card re-exports to make things easier
+    module Control.Monad.ContIO
   , module Control.Monad.ContIO.Class
   , module Control.Monad.Trans.Cont
   , module Control.Monad.Trans.Class
@@ -53,11 +53,7 @@ createFinalPoint = liftContIO $ ContT $ \c -> do
 
 withLifted
   :: MonadContIO m => (forall r . (a -> IO r) -> IO r) -> (a -> m b) -> m b
-withLifted withC f = do
-  escape <- createFinalPoint
-  a      <- liftContIO $ ContT withC
-  b      <- f a
-  escape b
+withLifted withC f = resetContIO $ liftContIO (ContT withC) >>= f
 
 -- | A version of `resetT` both specialized and generalized to MonadContIO.
 --
@@ -68,7 +64,7 @@ withLifted withC f = do
 resetContIO :: MonadContIO m => m a -> m a
 resetContIO m = do
   escape <- createFinalPoint
-  r <- m
+  r      <- m
   escape r
 -- or for people that dislike points (and readability):
--- resetCIO = (createFinalPoint >>=) . (>>=)
+-- resetContIO = (createFinalPoint >>=) . (>>=)
